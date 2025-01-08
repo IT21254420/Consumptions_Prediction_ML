@@ -6,9 +6,9 @@ from datetime import datetime
 from google.oauth2.service_account import Credentials
 
 # Load the trained models
-electricity_model = pickle.load(open('electricity_pkl.sav', 'rb'))
-steam_model = pickle.load(open('steam_pkl.sav', 'rb'))
-water_model = pickle.load(open('water_pkl.sav', 'rb'))
+electricity_model = pickle.load(open('Consumptions/electricity_pkl.sav', 'rb'))
+steam_model = pickle.load(open('Consumptions/steam_pkl.sav', 'rb'))
+water_model = pickle.load(open('Consumptions/water_pkl.sav', 'rb'))
 
 # Google Sheets setup
 def save_to_google_sheet(data):
