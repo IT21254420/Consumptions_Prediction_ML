@@ -1,2 +1,6 @@
 scikit-learn==1.5.1
 streamlit==1.27.2
+pandas
+gspread
+google-auth
+google-auth-oauthlib
