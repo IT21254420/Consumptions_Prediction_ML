@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import pickle
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import json
 from datetime import datetime
+from google.oauth2.service_account import Credentials
 
 # Load the trained models
 electricity_model = pickle.load(open('electricity_pkl.sav', 'rb'))
@@ -12,10 +12,13 @@ water_model = pickle.load(open('water_pkl.sav', 'rb'))
 
 # Google Sheets setup
 def save_to_google_sheet(data):
-    # Define the scope and authenticate
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name('consumption-prediction-f7496e8abee0.json', scope)
-    client = gspread.authorize(creds)
+    # Load the service account key from Streamlit secrets
+    service_account_info = json.loads(st.secrets["google"]["GOOGLE_CLOUD_KEY"])
+    credentials = Credentials.from_service_account_info(service_account_info)
+
+    # Authorize with Google Sheets
+    import gspread
+    client = gspread.authorize(credentials)
 
     # Open the spreadsheet
     sheet = client.open("Predictions Data").sheet1
