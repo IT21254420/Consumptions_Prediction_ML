@@ -12,40 +12,44 @@ water_model = pickle.load(open('Consumptions/water_pkl.sav', 'rb'))
 
 # Google Sheets setup
 def save_to_google_sheet(data):
-    # Load the service account key from Streamlit secrets
-    service_account_info = json.loads(st.secrets["google"]["GOOGLE_CLOUD_KEY"])
-    credentials = Credentials.from_service_account_info(service_account_info)
+    try:
+        # Load the service account key from Streamlit secrets
+        service_account_info = json.loads(st.secrets["google"]["GOOGLE_CLOUD_KEY"])
 
-    # Authorize with Google Sheets
-    import gspread
-    client = gspread.authorize(credentials)
+        # Specify required scopes for Google Sheets API
+        scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 
-    # Open the spreadsheet
-    sheet = client.open("Predictions Data").sheet1
+        # Create credentials with scopes
+        credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
 
-    # Get the current date and time
-    now = datetime.now()
-    current_time = now.strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
+        # Authorize with Google Sheets
+        import gspread
+        client = gspread.authorize(credentials)
 
-    # Append the data with the timestamp
-    sheet.append_row([current_time] + data)
+        # Open the spreadsheet
+        sheet = client.open("Predictions Data").sheet1
+
+        # Get the current date and time
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
+
+        # Append the data with the timestamp
+        sheet.append_row([current_time] + data)
+
+    except gspread.SpreadsheetNotFound:
+        st.error("The specified Google Sheet 'Predictions Data' could not be found. Please ensure it exists and is shared with the service account email.")
+    except Exception as e:
+        st.error(f"An error occurred while saving to Google Sheets: {str(e)}")
 
 # Streamlit UI
 st.markdown(
     "<div style='text-align: center; font-size: 46px; font-weight: bold;'>Multi-Consumption Prediction App</div>",
     unsafe_allow_html=True
 )
-st.markdown(
-    "<div style='margin-top: 40px; font-size: 18px;'>"
-    "</div>",
-    unsafe_allow_html=True,
-)
-
 st.write("")
 
 # Layout for Day and Night Input Counts
 st.subheader("Enter Machine Day and Night Counts")
-st.write("")
 st.write("")
 
 # Function for side-by-side input with labels above the fields
@@ -64,28 +68,14 @@ def side_by_side_input(label, key_day, key_night):
 col1, spacer, col2 = st.columns([2, 0.5, 2])  # Add spacing between the two columns
 with col1:
     knitting_day, knitting_night = side_by_side_input("Knitting Machines", 'knit_day', 'knit_night')
-    st.write("")
-    st.write("")
     bulk_dye_day, bulk_dye_night = side_by_side_input("Bulk Dye Machines", 'bulk_day', 'bulk_night')
-    st.write("")
-    st.write("")
     sample_dye_day, sample_dye_night = side_by_side_input("Sample Dye Machines", 'sample_day', 'sample_night')
-    st.write("")
-    st.write("")
     dryers_day, dryers_night = side_by_side_input("Dryers", 'dryers_day', 'dryers_night')
-    st.write("")
-    st.write("")
     presetting_day, presetting_night = side_by_side_input("Presetting Machines", 'presetting_day', 'presetting_night')
 with col2:
     chillers_day, chillers_night = side_by_side_input("Chillers", 'chill_day', 'chill_night')
-    st.write("")
-    st.write("")
     ahu_day, ahu_night = side_by_side_input("AHU", 'ahu_day', 'ahu_night')
-    st.write("")
-    st.write("")
     compressor_day, compressor_night = side_by_side_input("Compressors", 'comp_day', 'comp_night')
-    st.write("")
-    st.write("")
     luwa_day, luwa_night = side_by_side_input("Luwa", 'luwa_day', 'luwa_night')
 
 st.write("---")
